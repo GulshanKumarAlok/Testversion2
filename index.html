@@ -163,8 +163,8 @@
 
         /* Initially hide the model-viewer until a model is loaded */
         model-viewer#doorModelViewer {
+            /* CSS ensures it starts hidden. JS will show it. */
             display: none;
-            /* JavaScript will set to 'block' on load */
         }
 
 
@@ -366,51 +366,44 @@
         const loadingMessage = document.getElementById('loadingMessage');
         const errorMessage = document.getElementById('errorMessage');
 
-        // --- IMPORTANT: CONFIGURE YOUR MODEL ---
-        const modelPath = 'https://d2uimaqek2eby3.cloudfront.net/WIP/4.glb'; // Path to your GLB model
-        // Ensure this base model is accessible via HTTP(S) at this path
-        // relative to where this PHP file is served.
+        const modelPath = 'assets/door.glb';
 
-        // Original dimensions of your model in METERS.
-        // These will be updated after the model is loaded based on its bounding box.
-        let ORIGINAL_MODEL_HEIGHT_METERS = 1.0; // Default placeholder, will be updated
-        let ORIGINAL_MODEL_WIDTH_METERS = 1.0;  // Default placeholder, will be updated
-        // --- END OF MODEL CONFIGURATION ---
+        let ORIGINAL_MODEL_HEIGHT_METERS = 1.0;
+        let ORIGINAL_MODEL_WIDTH_METERS = 1.0;
 
         let originalModelScene;
         const loader = new GLTFLoader();
         const exporter = new GLTFExporter();
-        let currentBlobUrl = null; // To manage Blob URL lifecycle
 
-        // Function to display error messages
+        let initialModelBlobUrl = null; // For the initially displayed pivoted model
+        let currentScaledModelBlobUrl = null; // For the user-scaled models
+
         function showError(message) {
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
             loadingMessage.style.display = 'none';
-            submitButton.disabled = false; // Re-enable button on error
+            submitButton.disabled = false;
         }
 
-        // Function to show loading messages
         function showLoading(message) {
             loadingMessage.textContent = message;
             loadingMessage.style.display = 'block';
             errorMessage.style.display = 'none';
-            submitButton.disabled = true; // Disable button while loading
+            submitButton.disabled = true;
         }
 
-        // Function to hide messages
         function hideMessages() {
             loadingMessage.style.display = 'none';
             errorMessage.style.display = 'none';
-            submitButton.disabled = false; // Re-enable button when done
         }
 
         // --- Model Loading and Pre-processing ---
-        showLoading('Loading base 3D model...');
+        showLoading('Loading and preparing base 3D model...'); // Updated message
         submitButton.disabled = true;
+
         loader.load(
             modelPath,
-            (gltf) => {
+            async (gltf) => { // Callback is now async
                 originalModelScene = gltf.scene;
 
                 const box = new THREE.Box3().setFromObject(originalModelScene);
@@ -425,31 +418,64 @@
                 ORIGINAL_MODEL_WIDTH_METERS = size.x;
 
                 console.log('Measured base model dimensions (meters):', `Height=${size.y.toFixed(3)}`, `Width=${size.x.toFixed(3)}`, `Depth=${size.z.toFixed(3)}`);
-                originalModelScene.position.sub(pivot);
 
-                hideMessages();
-                console.log('Base 3D model loaded, pre-processed, and origin shifted to bottom centre.');
-                submitButton.disabled = false;
+                // Apply pivot adjustment to originalModelScene. This scene object will be used for scaling later.
+                originalModelScene.position.sub(pivot);
+                console.log('In-memory base model (originalModelScene) pivot adjusted to its bottom-centre.');
+
+                try {
+                    // --- Export this pivoted, unscaled model for initial display ---
+                    console.log('Exporting pivoted base model for initial display...');
+                    const exportOptions = { binary: true };
+                    // We export originalModelScene which now has its position adjusted (pivoted).
+                    const initialGlbArrayBuffer = await exporter.parseAsync(originalModelScene, exportOptions);
+
+                    if (!(initialGlbArrayBuffer instanceof ArrayBuffer) || initialGlbArrayBuffer.byteLength < 100) {
+                        throw new Error('Failed to export initial pivoted model or exported data is invalid.');
+                    }
+
+                    const initialGlbBlob = new Blob([initialGlbArrayBuffer], { type: 'model/gltf-binary' });
+
+                    // Revoke previous initial model blob URL if any (e.g., for hot reloads or error retries)
+                    if (initialModelBlobUrl) {
+                        URL.revokeObjectURL(initialModelBlobUrl);
+                    }
+                    initialModelBlobUrl = URL.createObjectURL(initialGlbBlob);
+
+                    console.log('Displaying pivoted (bottom-centered) base model from Blob URL:', initialModelBlobUrl);
+                    modelViewerElement.src = initialModelBlobUrl; // Use Blob URL of pivoted model
+                    modelViewerElement.style.display = 'block';
+
+                    // originalModelScene is now pivoted and ready for cloning & scaling operations later.
+                    hideMessages();
+                    submitButton.disabled = false;
+
+                } catch (exportError) {
+                    console.error('Error exporting or displaying initial pivoted model:', exportError);
+                    showError(`Failed to prepare initial model view: ${exportError.message}. Please ensure the base model is valid.`);
+                    modelViewerElement.style.display = 'none'; // Keep hidden on error
+                    submitButton.disabled = true;
+                }
             },
-            undefined,
+            undefined, // onProgress callback
             (error) => {
                 console.error('Error loading default 3D model:', error);
                 showError(`Failed to load base model from "${modelPath}". Check path and file.`);
                 submitButton.disabled = true;
+                modelViewerElement.style.display = 'none';
             }
         );
 
         // --- Event Listener for the Submit Button ---
         submitButton.addEventListener('click', async () => {
             if (!originalModelScene) {
-                showError('Base 3D model is not loaded yet. Please wait or refresh.');
+                showError('Base 3D model is not loaded or prepared yet. Please wait or refresh.');
                 return;
             }
 
             hideMessages();
-            showLoading('Processing dimensions and generating model...');
+            showLoading('Processing dimensions and generating scaled model...');
 
-            // 1. Get and Validate Dimensions
             const heightFt = parseFloat(heightFtInput.value) || 0;
             const heightIn = parseFloat(heightInInput.value) || 0;
             const widthFt = parseFloat(widthFtInput.value) || 0;
@@ -464,7 +490,6 @@
                 return;
             }
 
-            // 2. Convert Dimensions to Meters
             const totalHeightInches = (heightFt * 12) + heightIn;
             const totalWidthInches = (widthFt * 12) + widthIn;
             const targetHeightMeters = totalHeightInches * 0.0254;
@@ -479,11 +504,12 @@
                 return;
             }
 
-            // 3. Scale the Model
+            // Clone the originalModelScene (which is already pivoted to bottom-center).
             const scaledModel = originalModelScene.clone(true);
+
             const scaleY = targetHeightMeters / ORIGINAL_MODEL_HEIGHT_METERS;
             const scaleX = targetWidthMeters / ORIGINAL_MODEL_WIDTH_METERS;
-            const scaleZ = scaleX;
+            const scaleZ = scaleX; // Depth scales proportionally to width
 
             console.log(`Target H=${targetHeightMeters.toFixed(3)}m, W=${targetWidthMeters.toFixed(3)}m`);
             console.log(`Original H=${ORIGINAL_MODEL_HEIGHT_METERS.toFixed(3)}m, W=${ORIGINAL_MODEL_WIDTH_METERS.toFixed(3)}m`);
@@ -495,56 +521,47 @@
             const scaledSize = scaledBox.getSize(new THREE.Vector3());
             console.log(`Scaled model BBox (m): H=${scaledSize.y.toFixed(3)}, W=${scaledSize.x.toFixed(3)}, D=${scaledSize.z.toFixed(3)}`);
 
-            // 4. Export the Scaled Model to GLB and create a Blob URL
-            showLoading('Generating 3D model for local view...');
+            showLoading('Generating scaled 3D model for local view...');
             try {
-                const options = { binary: true };
+                const exportOptions = { binary: true };
                 console.log('Attempting to export scaled model to ArrayBuffer...');
-                const glbArrayBuffer = await exporter.parseAsync(scaledModel, options);
+                const glbArrayBuffer = await exporter.parseAsync(scaledModel, exportOptions);
 
-                console.log('Model exported to ArrayBuffer successfully.');
-                console.log('Is data an ArrayBuffer?', glbArrayBuffer instanceof ArrayBuffer);
-                console.log('Size of ArrayBuffer:', glbArrayBuffer ? glbArrayBuffer.byteLength : 'undefined');
-
+                console.log('Scaled model exported to ArrayBuffer successfully.');
                 if (!(glbArrayBuffer instanceof ArrayBuffer)) {
-                    console.error("parseAsync did not return an ArrayBuffer as expected.");
-                    showError("Internal error: GLB exporter did not return binary data in expected format.");
+                    console.error("parseAsync did not return an ArrayBuffer for scaled model.");
+                    showError("Internal error: Scaled GLB exporter did not return binary data in expected format.");
                     return;
                 }
-                if (glbArrayBuffer.byteLength < 100) { // Basic sanity check for GLB size
-                    console.warn(`Exported GLB is very small (${glbArrayBuffer.byteLength} bytes). This might indicate an issue.`);
+                if (glbArrayBuffer.byteLength < 100) {
+                    console.warn(`Exported scaled GLB is very small (${glbArrayBuffer.byteLength} bytes).`);
                 }
 
-                // Create a Blob from the ArrayBuffer
                 const glbBlob = new Blob([glbArrayBuffer], { type: 'model/gltf-binary' });
 
-                // Revoke the previous Blob URL if one exists to free memory
-                if (currentBlobUrl) {
-                    URL.revokeObjectURL(currentBlobUrl);
-                    console.log('Revoked previous Blob URL:', currentBlobUrl);
+                if (currentScaledModelBlobUrl) {
+                    URL.revokeObjectURL(currentScaledModelBlobUrl);
+                    console.log('Revoked previous scaled model Blob URL:', currentScaledModelBlobUrl);
                 }
+                currentScaledModelBlobUrl = URL.createObjectURL(glbBlob);
+                console.log('Generated Blob URL for scaled model:', currentScaledModelBlobUrl);
 
-                // Create a new Object URL from the Blob
-                currentBlobUrl = URL.createObjectURL(glbBlob);
-                console.log('Generated Blob URL for model:', currentBlobUrl);
-
-                // Set the src of the model-viewer to the new Blob URL
-                modelViewerElement.src = currentBlobUrl;
-                modelViewerElement.style.display = 'block';
+                modelViewerElement.src = currentScaledModelBlobUrl; // Update src to the new scaled model
+                modelViewerElement.style.display = 'block'; // Ensure it's visible
                 hideMessages();
+                submitButton.disabled = false;
 
             } catch (exportOrBlobError) {
-                console.error('Error during GLB export or Blob URL creation:', exportOrBlobError);
-                showError(`Failed to generate or display the 3D model: ${exportOrBlobError.message}`);
-                // If a blob URL was created but an error occurred afterwards, revoke it.
-                if (currentBlobUrl && modelViewerElement.src !== currentBlobUrl) {
-                    URL.revokeObjectURL(currentBlobUrl);
-                    currentBlobUrl = null;
+                console.error('Error during scaled GLB export or Blob URL creation:', exportOrBlobError);
+                showError(`Failed to generate or display the scaled 3D model: ${exportOrBlobError.message}`);
+                if (currentScaledModelBlobUrl && modelViewerElement.src !== currentScaledModelBlobUrl) {
+                    URL.revokeObjectURL(currentScaledModelBlobUrl);
+                    currentScaledModelBlobUrl = null;
                 }
+                submitButton.disabled = false;
             }
         });
 
-        // Optional: Listen for AR status changes
         modelViewerElement.addEventListener('ar-status', (event) => {
             console.log(`AR Status: ${event.detail.status}`);
             if (event.detail.status === 'failed') {
@@ -553,7 +570,18 @@
             }
         });
 
-        // Add some initial console logs for debugging original model dimensions
+        // Optional: Revoke blob URLs on page unload to free resources
+        window.addEventListener('beforeunload', () => {
+            if (initialModelBlobUrl) {
+                URL.revokeObjectURL(initialModelBlobUrl);
+                console.log('Revoked initial model Blob URL on page unload.');
+            }
+            if (currentScaledModelBlobUrl) {
+                URL.revokeObjectURL(currentScaledModelBlobUrl);
+                console.log('Revoked scaled model Blob URL on page unload.');
+            }
+        });
+
         console.log('App started. Waiting for base model to load.');
         console.log(`Base model path: ${modelPath}`);
     </script>
