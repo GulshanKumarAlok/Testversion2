@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Door AR Configurator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+
+    <style>
+        /* General body styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f9;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            /* Align to top for longer content */
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Main container for the content */
+        .container {
+            background-color: #ffffff;
+            padding: 25px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+        }
+
+        /* Header styling */
+        header h1 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 2em;
+            /* Responsive font size */
+        }
+
+        header p {
+            color: #555;
+            margin-bottom: 25px;
+            font-size: 1em;
+        }
+
+        /* Controls section styling */
+        .controls {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9fafb;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .controls h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #374151;
+            font-size: 1.4em;
+        }
+
+        /* Input group styling for dimensions */
+        .input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+            gap: 10px;
+            /* Space between elements */
+        }
+
+        .input-group label {
+            font-weight: 500;
+            color: #4b5563;
+            min-width: 60px;
+            /* Ensure labels align */
+            text-align: left;
+        }
+
+        .input-group input[type="number"] {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 80px;
+            /* Fixed width for number inputs */
+            box-sizing: border-box;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .input-group input[type="number"]:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+
+        .input-group span {
+            color: #6b7280;
+            margin-left: -5px;
+            /* Adjust spacing for units */
+            margin-right: 10px;
+        }
+
+
+        /* Submit button styling */
+        .submit-button {
+            background-color: #3b82f6;
+            /* Tailwind blue-500 */
+            color: white;
+            font-weight: 500;
+            font-size: 1em;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            display: inline-flex;
+            /* For aligning icon and text */
+            align-items: center;
+            gap: 8px;
+            /* Space between icon and text */
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .submit-button:hover {
+            background-color: #2563eb;
+            /* Darker blue */
+        }
+
+        .submit-button:active {
+            transform: translateY(1px);
+            background-color: #1d4ed8;
+            /* Even darker blue */
+        }
+
+        /* Style for disabled button */
+        .submit-button:disabled {
+            background-color: #9ca3af;
+            /* Gray color */
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+
+        .submit-button svg {
+            margin-right: 5px;
+            /* Space between icon and text */
+        }
+
+        /* Model viewer container */
+        .viewer-container {
+            margin-top: 20px;
+            width: 100%;
+            height: auto;
+            /* Adjust height based on model-viewer */
+        }
+
+        /* Initially hide the model-viewer until a model is loaded */
+        model-viewer#doorModelViewer {
+            display: none;
+            /* JavaScript will set to 'block' on load */
+        }
+
+
+        /* Custom AR button prompt */
+        .ar-prompt {
+            background-color: #ffffff;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .ar-prompt:hover {
+            background-color: #3b82f6;
+            color: #ffffff;
+        }
+
+        /* Loading and Error Messages */
+        .loading-message,
+        .error-message {
+            margin-top: 15px;
+            font-size: 0.9em;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            /* Controlled by JavaScript */
+        }
+
+        .loading-message {
+            color: #166534;
+            background-color: #f0fdf4;
+        }
+
+        .error-message {
+            color: #b91c1c;
+            background-color: #fef2f2;
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 15px;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            header p {
+                font-size: 0.9em;
+            }
+
+            .controls {
+                padding: 15px;
+            }
+
+            .controls h2 {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+
+            .input-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+                margin-bottom: 15px;
+            }
+
+            .input-group label {
+                margin-bottom: 3px;
+                min-width: auto;
+            }
+
+            .input-group .input-fields {
+                display: flex;
+                gap: 5px;
+                align-items: center;
+            }
+
+            .input-group input[type="number"] {
+                width: 60px;
+                padding: 8px 10px;
+            }
+
+            .input-group span {
+                margin-right: 5px;
+                margin-left: 0;
+            }
+
+            .submit-button {
+                width: 100%;
+                justify-content: center;
+                padding: 10px 15px;
+                font-size: 0.95em;
+            }
+
+            .submit-button svg {
+                margin-right: 3px;
+            }
+
+            model-viewer#doorModelViewer {
+                height: 350px;
+                /* Adjust viewer height for smaller screens */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Customize Your Door</h1>
+            <p>Enter the dimensions below and see your door in 3D and AR!</p>
+        </header>
+
+        <div class="controls">
+            <h2>Enter Dimensions:</h2>
+            <div class="input-group">
+                <label for="doorHeightFt">Height:</label>
+                <input type="number" id="doorHeightFt" placeholder="ft" min="0" value="6">
+                <span>ft</span>
+                <input type="number" id="doorHeightIn" placeholder="in" min="0" max="11" value="8">
+                <span>in</span>
+            </div>
+            <div class="input-group">
+                <label for="doorWidthFt">Width:</label>
+                <input type="number" id="doorWidthFt" placeholder="ft" min="0" value="2">
+                <span>ft</span>
+                <input type="number" id="doorWidthIn" placeholder="in" min="0" max="11" value="6">
+                <span>in</span>
+            </div>
+            <button id="submitDimensions" class="submit-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="feather feather-box">
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                    </path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+                Generate & View in AR
+            </button>
+            <p id="loadingMessage" class="loading-message"></p>
+            <p id="errorMessage" class="error-message"></p>
+        </div>
+
+        <div class="viewer-container">
+            <model-viewer id="doorModelViewer" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed"
+                camera-controls camera-orbit="0deg 75deg 6m" min-camera-orbit="auto auto 3m"
+                max-camera-orbit="auto auto 12m" field-of-view="45deg" camera-target="0m 1.5m 0m" bounds="tight"
+                auto-rotate disable-zoom touch-action="pan-y" alt="Scalable Door Model" shadow-intensity="1"
+                exposure="1" environment-image="neutral"
+                style="width: 100%; height: 500px; border-radius: 12px; background-color: #f0f0f0;"
+                poster="https://placehold.co/600x400/e2e8f0/94a3b8?text=Your+3D+Door+Will+Appear+Here">
+                <div class="ar-prompt" slot="ar-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.61 10.86a3 3 0 0 1-5.22 0"></path>
+                        <path d="M10.86 17.61a3 3 0 0 1 0-5.22"></path>
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                        <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path>
+                    </svg>
+                    View in your space
+                </div>
+            </model-viewer>
+        </div>
+    </div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+        // Import necessary modules from Three.js
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+
+        // DOM Element References
+        const heightFtInput = document.getElementById('doorHeightFt');
+        const heightInInput = document.getElementById('doorHeightIn');
+        const widthFtInput = document.getElementById('doorWidthFt');
+        const widthInInput = document.getElementById('doorWidthIn');
+        const submitButton = document.getElementById('submitDimensions');
+        const modelViewerElement = document.getElementById('doorModelViewer');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // --- IMPORTANT: CONFIGURE YOUR MODEL ---
+        const modelPath = 'https://d2uimaqek2eby3.cloudfront.net/WIP/4.glb'; // Path to your GLB model
+        // Ensure this base model is accessible via HTTP(S) at this path
+        // relative to where this PHP file is served.
+
+        // Original dimensions of your model in METERS.
+        // These will be updated after the model is loaded based on its bounding box.
+        let ORIGINAL_MODEL_HEIGHT_METERS = 1.0; // Default placeholder, will be updated
+        let ORIGINAL_MODEL_WIDTH_METERS = 1.0;  // Default placeholder, will be updated
+        // --- END OF MODEL CONFIGURATION ---
+
+        let originalModelScene;
+        const loader = new GLTFLoader();
+        const exporter = new GLTFExporter();
+        let currentBlobUrl = null; // To manage Blob URL lifecycle
+
+        // Function to display error messages
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            loadingMessage.style.display = 'none';
+            submitButton.disabled = false; // Re-enable button on error
+        }
+
+        // Function to show loading messages
+        function showLoading(message) {
+            loadingMessage.textContent = message;
+            loadingMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+            submitButton.disabled = true; // Disable button while loading
+        }
+
+        // Function to hide messages
+        function hideMessages() {
+            loadingMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            submitButton.disabled = false; // Re-enable button when done
+        }
+
+        // --- Model Loading and Pre-processing ---
+        showLoading('Loading base 3D model...');
+        submitButton.disabled = true;
+        loader.load(
+            modelPath,
+            (gltf) => {
+                originalModelScene = gltf.scene;
+
+                const box = new THREE.Box3().setFromObject(originalModelScene);
+                const size = box.getSize(new THREE.Vector3());
+                const pivot = new THREE.Vector3(
+                    (box.min.x + box.max.x) / 2,
+                    box.min.y,
+                    (box.min.z + box.max.z) / 2
+                );
+
+                ORIGINAL_MODEL_HEIGHT_METERS = size.y;
+                ORIGINAL_MODEL_WIDTH_METERS = size.x;
+
+                console.log('Measured base model dimensions (meters):', `Height=${size.y.toFixed(3)}`, `Width=${size.x.toFixed(3)}`, `Depth=${size.z.toFixed(3)}`);
+                originalModelScene.position.sub(pivot);
+
+                hideMessages();
+                console.log('Base 3D model loaded, pre-processed, and origin shifted to bottom centre.');
+                submitButton.disabled = false;
+            },
+            undefined,
+            (error) => {
+                console.error('Error loading default 3D model:', error);
+                showError(`Failed to load base model from "${modelPath}". Check path and file.`);
+                submitButton.disabled = true;
+            }
+        );
+
+        // --- Event Listener for the Submit Button ---
+        submitButton.addEventListener('click', async () => {
+            if (!originalModelScene) {
+                showError('Base 3D model is not loaded yet. Please wait or refresh.');
+                return;
+            }
+
+            hideMessages();
+            showLoading('Processing dimensions and generating model...');
+
+            // 1. Get and Validate Dimensions
+            const heightFt = parseFloat(heightFtInput.value) || 0;
+            const heightIn = parseFloat(heightInInput.value) || 0;
+            const widthFt = parseFloat(widthFtInput.value) || 0;
+            const widthIn = parseFloat(widthInInput.value) || 0;
+
+            if ((heightFt <= 0 && heightIn <= 0) || (widthFt <= 0 && widthIn <= 0)) {
+                showError('Please enter valid positive height and width dimensions.');
+                return;
+            }
+            if (heightIn < 0 || heightIn >= 12 || widthIn < 0 || widthIn >= 12) {
+                showError('Inches must be between 0 and 11.');
+                return;
+            }
+
+            // 2. Convert Dimensions to Meters
+            const totalHeightInches = (heightFt * 12) + heightIn;
+            const totalWidthInches = (widthFt * 12) + widthIn;
+            const targetHeightMeters = totalHeightInches * 0.0254;
+            const targetWidthMeters = totalWidthInches * 0.0254;
+
+            if (targetHeightMeters < 0.3 || targetWidthMeters < 0.3) {
+                showError('Dimensions are too small. Please enter larger values.');
+                return;
+            }
+            if (targetHeightMeters > 4 || targetWidthMeters > 3) {
+                showError('Dimensions are too large. Please enter smaller values.');
+                return;
+            }
+
+            // 3. Scale the Model
+            const scaledModel = originalModelScene.clone(true);
+            const scaleY = targetHeightMeters / ORIGINAL_MODEL_HEIGHT_METERS;
+            const scaleX = targetWidthMeters / ORIGINAL_MODEL_WIDTH_METERS;
+            const scaleZ = scaleX;
+
+            console.log(`Target H=${targetHeightMeters.toFixed(3)}m, W=${targetWidthMeters.toFixed(3)}m`);
+            console.log(`Original H=${ORIGINAL_MODEL_HEIGHT_METERS.toFixed(3)}m, W=${ORIGINAL_MODEL_WIDTH_METERS.toFixed(3)}m`);
+            console.log(`Calculated Scale: X=${scaleX.toFixed(3)}, Y=${scaleY.toFixed(3)}, Z=${scaleZ.toFixed(3)}`);
+
+            scaledModel.scale.set(scaleX, scaleY, scaleZ);
+
+            const scaledBox = new THREE.Box3().setFromObject(scaledModel);
+            const scaledSize = scaledBox.getSize(new THREE.Vector3());
+            console.log(`Scaled model BBox (m): H=${scaledSize.y.toFixed(3)}, W=${scaledSize.x.toFixed(3)}, D=${scaledSize.z.toFixed(3)}`);
+
+            // 4. Export the Scaled Model to GLB and create a Blob URL
+            showLoading('Generating 3D model for local view...');
+            try {
+                const options = { binary: true };
+                console.log('Attempting to export scaled model to ArrayBuffer...');
+                const glbArrayBuffer = await exporter.parseAsync(scaledModel, options);
+
+                console.log('Model exported to ArrayBuffer successfully.');
+                console.log('Is data an ArrayBuffer?', glbArrayBuffer instanceof ArrayBuffer);
+                console.log('Size of ArrayBuffer:', glbArrayBuffer ? glbArrayBuffer.byteLength : 'undefined');
+
+                if (!(glbArrayBuffer instanceof ArrayBuffer)) {
+                    console.error("parseAsync did not return an ArrayBuffer as expected.");
+                    showError("Internal error: GLB exporter did not return binary data in expected format.");
+                    return;
+                }
+                if (glbArrayBuffer.byteLength < 100) { // Basic sanity check for GLB size
+                    console.warn(`Exported GLB is very small (${glbArrayBuffer.byteLength} bytes). This might indicate an issue.`);
+                }
+
+                // Create a Blob from the ArrayBuffer
+                const glbBlob = new Blob([glbArrayBuffer], { type: 'model/gltf-binary' });
+
+                // Revoke the previous Blob URL if one exists to free memory
+                if (currentBlobUrl) {
+                    URL.revokeObjectURL(currentBlobUrl);
+                    console.log('Revoked previous Blob URL:', currentBlobUrl);
+                }
+
+                // Create a new Object URL from the Blob
+                currentBlobUrl = URL.createObjectURL(glbBlob);
+                console.log('Generated Blob URL for model:', currentBlobUrl);
+
+                // Set the src of the model-viewer to the new Blob URL
+                modelViewerElement.src = currentBlobUrl;
+                modelViewerElement.style.display = 'block';
+                hideMessages();
+
+            } catch (exportOrBlobError) {
+                console.error('Error during GLB export or Blob URL creation:', exportOrBlobError);
+                showError(`Failed to generate or display the 3D model: ${exportOrBlobError.message}`);
+                // If a blob URL was created but an error occurred afterwards, revoke it.
+                if (currentBlobUrl && modelViewerElement.src !== currentBlobUrl) {
+                    URL.revokeObjectURL(currentBlobUrl);
+                    currentBlobUrl = null;
+                }
+            }
+        });
+
+        // Optional: Listen for AR status changes
+        modelViewerElement.addEventListener('ar-status', (event) => {
+            console.log(`AR Status: ${event.detail.status}`);
+            if (event.detail.status === 'failed') {
+                console.warn("AR session failed.");
+                showError("AR failed. Your device might not support AR, or there was an issue placing the model.");
+            }
+        });
+
+        // Add some initial console logs for debugging original model dimensions
+        console.log('App started. Waiting for base model to load.');
+        console.log(`Base model path: ${modelPath}`);
+    </script>
+</body>
+
+</html>
