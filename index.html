@@ -19,8 +19,7 @@
             color: #333;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            /* Align to top for longer content */
+            align-items: flex-start; /* Align to top for longer content */
             min-height: 100vh;
             line-height: 1.6;
         }
@@ -40,8 +39,7 @@
         header h1 {
             color: #2c3e50;
             margin-bottom: 8px;
-            font-size: 2em;
-            /* Responsive font size */
+            font-size: 2em; /* Responsive font size */
         }
 
         header p {
@@ -71,15 +69,13 @@
             display: flex;
             align-items: center;
             margin-bottom: 18px;
-            gap: 10px;
-            /* Space between elements */
+            gap: 10px; /* Space between elements */
         }
 
         .input-group label {
             font-weight: 500;
             color: #4b5563;
-            min-width: 60px;
-            /* Ensure labels align */
+            min-width: 60px; /* Ensure labels align */
             text-align: left;
         }
 
@@ -88,8 +84,7 @@
             border: 1px solid #d1d5db;
             border-radius: 8px;
             font-size: 1em;
-            width: 80px;
-            /* Fixed width for number inputs */
+            width: 80px; /* Fixed width for number inputs */
             box-sizing: border-box;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
@@ -102,16 +97,14 @@
 
         .input-group span {
             color: #6b7280;
-            margin-left: -5px;
-            /* Adjust spacing for units */
+            margin-left: -5px; /* Adjust spacing for units */
             margin-right: 10px;
         }
 
 
         /* Submit button styling */
         .submit-button {
-            background-color: #3b82f6;
-            /* Tailwind blue-500 */
+            background-color: #3b82f6; /* Tailwind blue-500 */
             color: white;
             font-weight: 500;
             font-size: 1em;
@@ -120,45 +113,38 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.1s ease;
-            display: inline-flex;
-            /* For aligning icon and text */
+            display: inline-flex; /* For aligning icon and text */
             align-items: center;
-            gap: 8px;
-            /* Space between icon and text */
+            gap: 8px; /* Space between icon and text */
             box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .submit-button:hover {
-            background-color: #2563eb;
-            /* Darker blue */
+            background-color: #2563eb; /* Darker blue */
         }
 
         .submit-button:active {
             transform: translateY(1px);
-            background-color: #1d4ed8;
-            /* Even darker blue */
+            background-color: #1d4ed8; /* Even darker blue */
         }
 
         /* Style for disabled button */
         .submit-button:disabled {
-            background-color: #9ca3af;
-            /* Gray color */
+            background-color: #9ca3af; /* Gray color */
             cursor: not-allowed;
             box-shadow: none;
         }
 
 
         .submit-button svg {
-            margin-right: 5px;
-            /* Space between icon and text */
+            margin-right: 5px; /* Space between icon and text */
         }
 
         /* Model viewer container */
         .viewer-container {
             margin-top: 20px;
             width: 100%;
-            height: auto;
-            /* Adjust height based on model-viewer */
+            height: auto; /* Adjust height based on model-viewer */
         }
 
         /* Initially hide the model-viewer until a model is loaded */
@@ -180,31 +166,26 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: background-color 0.3s, color 0.3s;
         }
-
         .ar-prompt:hover {
             background-color: #3b82f6;
             color: #ffffff;
         }
 
         /* Loading and Error Messages */
-        .loading-message,
-        .error-message {
+        .loading-message, .error-message {
             margin-top: 15px;
             font-size: 0.9em;
             padding: 10px;
             border-radius: 6px;
-            display: none;
-            /* Controlled by JavaScript */
+            display: none; /* Controlled by JavaScript */
         }
-
         .loading-message {
             color: #166534;
             background-color: #f0fdf4;
         }
-
         .error-message {
             color: #b91c1c;
             background-color: #fef2f2;
@@ -220,13 +201,12 @@
             header h1 {
                 font-size: 1.8em;
             }
-
             header p {
                 font-size: 0.9em;
             }
 
             .controls {
-                padding: 15px;
+              padding: 15px;
             }
 
             .controls h2 {
@@ -235,32 +215,29 @@
             }
 
             .input-group {
-                flex-direction: column;
+                flex-direction: column; /* Label on one line, input-fields div on the next */
                 align-items: flex-start;
                 gap: 5px;
                 margin-bottom: 15px;
             }
-
             .input-group label {
                 margin-bottom: 3px;
-                min-width: auto;
+                min-width: auto; /* Let label width be natural on small screens */
             }
-
-            .input-group .input-fields {
-                display: flex;
+            .input-group .input-fields { /* This div contains the inputs and spans */
+                display: flex;          /* Arranges inputs/spans horizontally */
                 gap: 5px;
                 align-items: center;
+                width: 100%; /* Allow the input fields group to take full width if needed */
             }
-
             .input-group input[type="number"] {
-                width: 60px;
+                width: 60px; /* Slightly smaller for mobile */
                 padding: 8px 10px;
             }
-
-            .input-group span {
-                margin-right: 5px;
-                margin-left: 0;
-            }
+             .input-group span { /* Spans are "ft" and "in" */
+                 margin-right: 5px;
+                 margin-left: 0;
+             }
 
             .submit-button {
                 width: 100%;
@@ -268,14 +245,12 @@
                 padding: 10px 15px;
                 font-size: 0.95em;
             }
-
             .submit-button svg {
                 margin-right: 3px;
             }
 
             model-viewer#doorModelViewer {
-                height: 350px;
-                /* Adjust viewer height for smaller screens */
+                height: 350px; /* Adjust viewer height for smaller screens */
             }
         }
     </style>
@@ -292,17 +267,21 @@
             <h2>Enter Dimensions:</h2>
             <div class="input-group">
                 <label for="doorHeightFt">Height:</label>
-                <input type="number" id="doorHeightFt" placeholder="ft" min="0" value="6">
-                <span>ft</span>
-                <input type="number" id="doorHeightIn" placeholder="in" min="0" max="11" value="8">
-                <span>in</span>
+                <div class="input-fields">
+                    <input type="number" id="doorHeightFt" placeholder="ft" min="0" value="6">
+                    <span>ft</span>
+                    <input type="number" id="doorHeightIn" placeholder="in" min="0" max="11" value="8">
+                    <span>in</span>
+                </div>
             </div>
             <div class="input-group">
                 <label for="doorWidthFt">Width:</label>
-                <input type="number" id="doorWidthFt" placeholder="ft" min="0" value="2">
-                <span>ft</span>
-                <input type="number" id="doorWidthIn" placeholder="in" min="0" max="11" value="6">
-                <span>in</span>
+                <div class="input-fields">
+                    <input type="number" id="doorWidthFt" placeholder="ft" min="0" value="2">
+                    <span>ft</span>
+                    <input type="number" id="doorWidthIn" placeholder="in" min="0" max="11" value="6">
+                    <span>in</span>
+                </div>
             </div>
             <button id="submitDimensions" class="submit-button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
@@ -366,7 +345,7 @@
         const loadingMessage = document.getElementById('loadingMessage');
         const errorMessage = document.getElementById('errorMessage');
 
-        const modelPath = 'https://d2uimaqek2eby3.cloudfront.net/WIP/4.glb';
+        const modelPath = 'assets/door.glb';
 
         let ORIGINAL_MODEL_HEIGHT_METERS = 1.0;
         let ORIGINAL_MODEL_WIDTH_METERS = 1.0;
@@ -398,12 +377,12 @@
         }
 
         // --- Model Loading and Pre-processing ---
-        showLoading('Loading and preparing base 3D model...'); // Updated message
+        showLoading('Loading and preparing base 3D model...');
         submitButton.disabled = true;
 
         loader.load(
             modelPath,
-            async (gltf) => { // Callback is now async
+            async (gltf) => { 
                 originalModelScene = gltf.scene;
 
                 const box = new THREE.Box3().setFromObject(originalModelScene);
@@ -419,15 +398,12 @@
 
                 console.log('Measured base model dimensions (meters):', `Height=${size.y.toFixed(3)}`, `Width=${size.x.toFixed(3)}`, `Depth=${size.z.toFixed(3)}`);
 
-                // Apply pivot adjustment to originalModelScene. This scene object will be used for scaling later.
                 originalModelScene.position.sub(pivot);
                 console.log('In-memory base model (originalModelScene) pivot adjusted to its bottom-centre.');
 
                 try {
-                    // --- Export this pivoted, unscaled model for initial display ---
                     console.log('Exporting pivoted base model for initial display...');
                     const exportOptions = { binary: true };
-                    // We export originalModelScene which now has its position adjusted (pivoted).
                     const initialGlbArrayBuffer = await exporter.parseAsync(originalModelScene, exportOptions);
 
                     if (!(initialGlbArrayBuffer instanceof ArrayBuffer) || initialGlbArrayBuffer.byteLength < 100) {
@@ -435,29 +411,27 @@
                     }
 
                     const initialGlbBlob = new Blob([initialGlbArrayBuffer], { type: 'model/gltf-binary' });
-
-                    // Revoke previous initial model blob URL if any (e.g., for hot reloads or error retries)
+                    
                     if (initialModelBlobUrl) {
                         URL.revokeObjectURL(initialModelBlobUrl);
                     }
                     initialModelBlobUrl = URL.createObjectURL(initialGlbBlob);
-
+                    
                     console.log('Displaying pivoted (bottom-centered) base model from Blob URL:', initialModelBlobUrl);
-                    modelViewerElement.src = initialModelBlobUrl; // Use Blob URL of pivoted model
+                    modelViewerElement.src = initialModelBlobUrl;
                     modelViewerElement.style.display = 'block';
 
-                    // originalModelScene is now pivoted and ready for cloning & scaling operations later.
                     hideMessages();
                     submitButton.disabled = false;
 
                 } catch (exportError) {
                     console.error('Error exporting or displaying initial pivoted model:', exportError);
                     showError(`Failed to prepare initial model view: ${exportError.message}. Please ensure the base model is valid.`);
-                    modelViewerElement.style.display = 'none'; // Keep hidden on error
+                    modelViewerElement.style.display = 'none';
                     submitButton.disabled = true;
                 }
             },
-            undefined, // onProgress callback
+            undefined, 
             (error) => {
                 console.error('Error loading default 3D model:', error);
                 showError(`Failed to load base model from "${modelPath}". Check path and file.`);
@@ -466,7 +440,6 @@
             }
         );
 
-        // --- Event Listener for the Submit Button ---
         submitButton.addEventListener('click', async () => {
             if (!originalModelScene) {
                 showError('Base 3D model is not loaded or prepared yet. Please wait or refresh.');
@@ -486,8 +459,8 @@
                 return;
             }
             if (heightIn < 0 || heightIn >= 12 || widthIn < 0 || widthIn >= 12) {
-                showError('Inches must be between 0 and 11.');
-                return;
+                 showError('Inches must be between 0 and 11.');
+                 return;
             }
 
             const totalHeightInches = (heightFt * 12) + heightIn;
@@ -499,17 +472,16 @@
                 showError('Dimensions are too small. Please enter larger values.');
                 return;
             }
-            if (targetHeightMeters > 4 || targetWidthMeters > 3) {
-                showError('Dimensions are too large. Please enter smaller values.');
-                return;
+            if (targetHeightMeters > 4 || targetWidthMeters > 3) { 
+                 showError('Dimensions are too large. Please enter smaller values.');
+                 return;
             }
-
-            // Clone the originalModelScene (which is already pivoted to bottom-center).
+            
             const scaledModel = originalModelScene.clone(true);
 
             const scaleY = targetHeightMeters / ORIGINAL_MODEL_HEIGHT_METERS;
             const scaleX = targetWidthMeters / ORIGINAL_MODEL_WIDTH_METERS;
-            const scaleZ = scaleX; // Depth scales proportionally to width
+            const scaleZ = scaleX; 
 
             console.log(`Target H=${targetHeightMeters.toFixed(3)}m, W=${targetWidthMeters.toFixed(3)}m`);
             console.log(`Original H=${ORIGINAL_MODEL_HEIGHT_METERS.toFixed(3)}m, W=${ORIGINAL_MODEL_WIDTH_METERS.toFixed(3)}m`);
@@ -529,13 +501,13 @@
 
                 console.log('Scaled model exported to ArrayBuffer successfully.');
                 if (!(glbArrayBuffer instanceof ArrayBuffer)) {
-                    console.error("parseAsync did not return an ArrayBuffer for scaled model.");
-                    showError("Internal error: Scaled GLB exporter did not return binary data in expected format.");
-                    return;
+                     console.error("parseAsync did not return an ArrayBuffer for scaled model.");
+                     showError("Internal error: Scaled GLB exporter did not return binary data in expected format.");
+                     return;
                 }
-                if (glbArrayBuffer.byteLength < 100) {
-                    console.warn(`Exported scaled GLB is very small (${glbArrayBuffer.byteLength} bytes).`);
-                }
+                 if (glbArrayBuffer.byteLength < 100) {
+                      console.warn(`Exported scaled GLB is very small (${glbArrayBuffer.byteLength} bytes).`);
+                 }
 
                 const glbBlob = new Blob([glbArrayBuffer], { type: 'model/gltf-binary' });
 
@@ -546,8 +518,8 @@
                 currentScaledModelBlobUrl = URL.createObjectURL(glbBlob);
                 console.log('Generated Blob URL for scaled model:', currentScaledModelBlobUrl);
 
-                modelViewerElement.src = currentScaledModelBlobUrl; // Update src to the new scaled model
-                modelViewerElement.style.display = 'block'; // Ensure it's visible
+                modelViewerElement.src = currentScaledModelBlobUrl;
+                modelViewerElement.style.display = 'block'; 
                 hideMessages();
                 submitButton.disabled = false;
 
@@ -570,7 +542,6 @@
             }
         });
 
-        // Optional: Revoke blob URLs on page unload to free resources
         window.addEventListener('beforeunload', () => {
             if (initialModelBlobUrl) {
                 URL.revokeObjectURL(initialModelBlobUrl);
@@ -586,5 +557,4 @@
         console.log(`Base model path: ${modelPath}`);
     </script>
 </body>
-
 </html>
