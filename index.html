@@ -19,7 +19,6 @@
             display: flex;
             justify-content: center;
             align-items: flex-start;
-
             min-height: 100vh;
             line-height: 1.6;
         }
@@ -40,7 +39,6 @@
             color: #2c3e50;
             margin-bottom: 8px;
             font-size: 2em;
-
         }
 
         header p {
@@ -70,15 +68,13 @@
             display: flex;
             align-items: center;
             margin-bottom: 18px;
-            gap: 10px;
-
+            gap: 10px; /* Gap between label and input fields container */
         }
 
         .input-group label {
             font-weight: 500;
             color: #4b5563;
             min-width: 60px;
-
             text-align: left;
         }
 
@@ -88,7 +84,6 @@
             border-radius: 8px;
             font-size: 1em;
             width: 80px;
-
             box-sizing: border-box;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
@@ -102,15 +97,20 @@
         .input-group span {
             color: #6b7280;
             margin-left: -5px;
-
             margin-right: 10px;
+        }
+
+        /* Container for feet and inches inputs on smaller screens */
+        .input-group .input-fields {
+            display: flex; /* Default display (flex row) */
+            align-items: center;
+            gap: 10px; /* Space between ft and in parts on larger screens */
         }
 
 
 
         .submit-button {
             background-color: #3b82f6;
-
             color: white;
             font-weight: 500;
             font-size: 1em;
@@ -120,28 +120,23 @@
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.1s ease;
             display: inline-flex;
-
             align-items: center;
             gap: 8px;
-
             box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .submit-button:hover {
             background-color: #2563eb;
-
         }
 
         .submit-button:active {
             transform: translateY(1px);
             background-color: #1d4ed8;
-
         }
 
 
         .submit-button:disabled {
             background-color: #9ca3af;
-
             cursor: not-allowed;
             box-shadow: none;
         }
@@ -149,7 +144,6 @@
 
         .submit-button svg {
             margin-right: 5px;
-
         }
 
 
@@ -157,13 +151,16 @@
             margin-top: 20px;
             width: 100%;
             height: auto;
-
         }
 
 
         model-viewer#doorModelViewer {
-
-            display: none;
+            /* Initially visible, will be hidden if model load fails */
+             width: 100%;
+             height: 500px;
+             border-radius: 12px;
+             background-color: #f0f0f0;
+             display: block; /* Ensure it's block by default */
         }
 
 
@@ -188,15 +185,14 @@
             color: #ffffff;
         }
 
-        
+
         .loading-message,
         .error-message {
             margin-top: 15px;
             font-size: 0.9em;
             padding: 10px;
             border-radius: 6px;
-            display: none;
-
+            display: none; /* Hidden by default */
         }
 
         .loading-message {
@@ -234,22 +230,24 @@
             }
 
             .input-group {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
+                flex-direction: row; /* Changed: Label and input-fields side-by-side */
+                justify-content: space-between; /* Added: Space out label and input-fields */
+                align-items: center; /* Added: Vertically align label and input-fields */
+                gap: 5px; /* Keep gap for items within .input-fields */
                 margin-bottom: 15px;
             }
 
             .input-group label {
-                margin-bottom: 3px;
+                margin-bottom: 0; /* Removed margin */
                 min-width: auto;
             }
 
-            .input-group .input-fields {
+            .input-group .input-fields { /* New rule for the container holding ft/in inputs */
                 display: flex;
-                gap: 5px;
                 align-items: center;
+                gap: 5px; /* Smaller gap between ft and in parts on small screens */
             }
+
 
             .input-group input[type="number"] {
                 width: 60px;
@@ -258,7 +256,7 @@
 
             .input-group span {
                 margin-right: 5px;
-                margin-left: 0;
+                margin-left: 0; /* Reset left margin */
             }
 
             .submit-button {
@@ -274,7 +272,6 @@
 
             model-viewer#doorModelViewer {
                 height: 350px;
-
             }
         }
     </style>
@@ -293,7 +290,6 @@
                 max-camera-orbit="auto auto 12m" field-of-view="45deg" camera-target="0m 1.5m 0m" bounds="tight"
                 auto-rotate disable-zoom touch-action="pan-y" alt="Scalable Door Model" shadow-intensity="1"
                 exposure="1" environment-image="neutral"
-                style="width: 100%; height: 500px; border-radius: 12px; background-color: #f0f0f0;"
                 poster="https://placehold.co/600x400/e2e8f0/94a3b8?text=Your+3D+Door+Will+Appear+Here">
                 <div class="ar-prompt" slot="ar-button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -311,18 +307,18 @@
             <h2>Enter Dimensions:</h2>
             <div class="input-group">
                 <label for="doorHeightFt">Height:</label>
-                <input type="number" id="doorHeightFt" placeholder="ft" min="0" value="6">
-                <span>ft</span>
-                <input type="number" id="doorHeightIn" placeholder="in" min="0" max="11" value="8">
-                <span>in</span>
-            </div>
+                <div class="input-fields"> <input type="number" id="doorHeightFt" placeholder="ft" min="0" value="6">
+                    <span>ft</span>
+                    <input type="number" id="doorHeightIn" placeholder="in" min="0" max="11" value="8">
+                    <span>in</span>
+                </div> </div>
             <div class="input-group">
                 <label for="doorWidthFt">Width:</label>
-                <input type="number" id="doorWidthFt" placeholder="ft" min="0" value="2">
-                <span>ft</span>
-                <input type="number" id="doorWidthIn" placeholder="in" min="0" max="11" value="6">
-                <span>in</span>
-            </div>
+                 <div class="input-fields"> <input type="number" id="doorWidthFt" placeholder="ft" min="0" value="2">
+                    <span>ft</span>
+                    <input type="number" id="doorWidthIn" placeholder="in" min="0" max="11" value="6">
+                    <span>in</span>
+                </div> </div>
             <button id="submitDimensions" class="submit-button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -493,12 +489,14 @@
             const targetHeightMeters = totalHeightInches * 0.0254;
             const targetWidthMeters = totalWidthInches * 0.0254;
 
-            if (targetHeightMeters < 0.3 || targetWidthMeters < 0.3) {
-                showError('Dimensions are too small. Please enter larger values.');
+             if (targetHeightMeters < 0.3 || targetWidthMeters < 0.3) {
+                showError('Dimensions are too small (minimum ~1ft). Please enter larger values.');
+                submitButton.disabled = false;
                 return;
             }
             if (targetHeightMeters > 4 || targetWidthMeters > 3) {
-                showError('Dimensions are too large. Please enter smaller values.');
+                showError('Dimensions are too large (maximum ~13ft high, ~10ft wide). Please enter smaller values.');
+                 submitButton.disabled = false;
                 return;
             }
 
@@ -507,7 +505,7 @@
 
             const scaleY = targetHeightMeters / ORIGINAL_MODEL_HEIGHT_METERS;
             const scaleX = targetWidthMeters / ORIGINAL_MODEL_WIDTH_METERS;
-            const scaleZ = scaleX;
+            const scaleZ = scaleX; // Assuming depth scales proportionally with width
 
             console.log(`Target H=${targetHeightMeters.toFixed(3)}m, W=${targetWidthMeters.toFixed(3)}m`);
             console.log(`Original H=${ORIGINAL_MODEL_HEIGHT_METERS.toFixed(3)}m, W=${ORIGINAL_MODEL_WIDTH_METERS.toFixed(3)}m`);
